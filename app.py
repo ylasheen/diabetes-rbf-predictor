@@ -10,7 +10,7 @@ st.set_page_config(
     page_title="DiabetesAI · Neural Risk System",
     page_icon="🩺",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
 st.markdown("""
@@ -45,6 +45,38 @@ st.markdown("""
                 var(--bg) !important;
 }
 .main .block-container { padding: 2rem 2.5rem; max-width: 1440px; }
+
+/* ── Mobile Responsive ── */
+@media (max-width: 768px) {
+    .main .block-container { padding: 1rem 0.8rem !important; }
+
+    /* Sidebar full width on mobile */
+    section[data-testid="stSidebar"] {
+        width: 100% !important;
+        min-width: 100% !important;
+    }
+
+    /* Stack columns vertically */
+    [data-testid="column"] {
+        width: 100% !important;
+        flex: 1 1 100% !important;
+        min-width: 100% !important;
+    }
+
+    /* Smaller hero title */
+    .hero-title { font-size: 1.6rem !important; }
+
+    /* Metrics smaller */
+    div[data-testid="stMetric"] { padding: 0.7rem !important; }
+    div[data-testid="stMetric"] [data-testid="stMetricValue"] { font-size: 1rem !important; }
+
+    /* Tabs scrollable */
+    .stTabs [data-baseweb="tab-list"] { overflow-x: auto !important; flex-wrap: nowrap !important; }
+    .stTabs [data-baseweb="tab"] { font-size: 0.75rem !important; padding: 0.4rem 0.7rem !important; white-space: nowrap !important; }
+
+    /* Risk banner stack */
+    .risk-banner-inner { flex-direction: column !important; gap: 0.8rem !important; text-align: center !important; }
+}
 
 /* ── Sidebar ── */
 section[data-testid="stSidebar"] {
@@ -411,6 +443,23 @@ with c4: st.metric("Decision Threshold", f"{threshold:.2f}")
 
 st.markdown("<hr style='border-color:rgba(255,255,255,0.05); margin:1.5rem 0;'>", unsafe_allow_html=True)
 
+# ── MOBILE INPUT SECTION ──────────────────────────────
+with st.expander("📋  Patient Parameters", expanded=False):
+    mc1, mc2 = st.columns(2)
+    with mc1:
+        preg  = st.slider("Pregnancies",              0,   17,  preg,  1, key="m_preg")
+        gluc  = st.slider("Glucose (mg/dL)",         44,  200, gluc,   1, key="m_gluc")
+        bp    = st.slider("Blood Pressure (mmHg)",   24,  122,  bp,    1, key="m_bp")
+        skin  = st.slider("Skin Thickness (mm)",      7,   99, skin,   1, key="m_skin")
+    with mc2:
+        ins   = st.slider("Insulin (μU/mL)",         14,  846,  ins,   1, key="m_ins")
+        bmi   = st.slider("BMI",                   18.0, 67.0,  bmi, 0.1, key="m_bmi")
+        dpf   = st.slider("Diabetes Pedigree",     0.08, 2.42,  dpf,0.01, key="m_dpf")
+        age   = st.slider("Age (years)",             21,   81,  age,   1, key="m_age")
+    run = st.button("⬡  Run Neural Analysis", key="mobile_run") or run
+
+st.markdown("<hr style='border-color:rgba(255,255,255,0.05); margin:1rem 0;'>", unsafe_allow_html=True)
+
 # ── RESULT ────────────────────────────────────────────
 if run:
     vals = [preg, gluc, bp, skin, ins, bmi, dpf, age]
@@ -418,138 +467,4 @@ if run:
         time.sleep(0.5)
         pred, p_no, p_diab = predict(vals)
 
-    report = generate_report(preg, gluc, bp, skin, ins, bmi, dpf, age, pred, p_diab)
-
-    # Risk banner
-    if pred == 1:
-        bc, icon, label = "#f43f5e", "⚠", "HIGH RISK — Diabetic"
-        bg_c = "rgba(244,63,94,0.07)"
-    else:
-        bc, icon, label = "#14b8a6", "✓", "LOW RISK — Non-Diabetic"
-        bg_c = "rgba(20,184,166,0.07)"
-
-    st.markdown(f"""
-    <div style='background:{bg_c}; border:1px solid {bc}40;
-                border-left:3px solid {bc}; border-radius:16px;
-                padding:1.5rem 2rem; margin-bottom:1.5rem;
-                display:flex; align-items:center; justify-content:space-between;'>
-        <div style='display:flex; align-items:center; gap:16px;'>
-            <div style='width:44px; height:44px; border-radius:50%;
-                        background:{bc}20; border:1.5px solid {bc};
-                        display:flex; align-items:center; justify-content:center;
-                        font-size:1.3rem; color:{bc};'>{icon}</div>
-            <div>
-                <div style='font-size:1.3rem; font-weight:700; color:{bc};
-                            font-family:Outfit,sans-serif;'>{label}</div>
-                <div style='color:#64748b; font-size:0.82rem; margin-top:2px;'>
-                    Neural analysis complete · RBF confidence score
-                </div>
-            </div>
-        </div>
-        <div style='text-align:right;'>
-            <div style='font-family:JetBrains Mono,monospace; font-size:2.2rem;
-                        font-weight:700; color:{bc}; line-height:1;'>{p_diab:.1%}</div>
-            <div style='color:#64748b; font-size:0.75rem; margin-top:4px;'>diabetes probability</div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Tabs
-    t1, t2, t3 = st.tabs(["  ⬡  Neural Analysis  ", "  ◈  Feature Profile  ", "  ✦  Clinical Report  "])
-
-    with t1:
-        col1, col2 = st.columns([1, 1], gap="large")
-        with col1:
-            st.markdown("<div style='color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:0.8rem;'>◈ PROBABILITY GAUGE</div>", unsafe_allow_html=True)
-            st.pyplot(plot_gauge(p_diab), use_container_width=True)
-        with col2:
-            st.markdown("<div style='color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:0.8rem;'>◈ CONFIDENCE BREAKDOWN</div>", unsafe_allow_html=True)
-            st.pyplot(plot_confidence(p_diab, p_no), use_container_width=True)
-            st.markdown("<br>", unsafe_allow_html=True)
-            m1, m2 = st.columns(2)
-            with m1: st.metric("🔴 Diabetic", f"{p_diab:.1%}")
-            with m2: st.metric("🟢 Non-Diabetic", f"{p_no:.1%}")
-
-    with t2:
-        col1, col2 = st.columns([1, 1], gap="large")
-        with col1:
-            st.markdown("<div style='color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:0.8rem;'>◈ PATIENT RADAR</div>", unsafe_allow_html=True)
-            st.pyplot(plot_radar(vals), use_container_width=True)
-        with col2:
-            st.markdown("<div style='color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:1rem;'>◈ BIOMARKER SUMMARY</div>", unsafe_allow_html=True)
-            labels = ['Pregnancies','Glucose','Blood Pressure','Skin Thickness','Insulin','BMI','Diabetes Pedigree','Age']
-            maxv   = [17, 200, 122, 99, 846, 67, 2.5, 81]
-            for label, v, mx in zip(labels, vals, maxv):
-                pct = min(v/mx, 1.0)
-                color = "#f43f5e" if pct > 0.75 else ("#f59e0b" if pct > 0.45 else "#14b8a6")
-                st.markdown(f"""
-                <div style='margin-bottom:0.9rem;'>
-                    <div style='display:flex; justify-content:space-between; margin-bottom:5px;'>
-                        <span style='color:#94a3b8; font-size:0.8rem;'>{label}</span>
-                        <span style='font-family:JetBrains Mono,monospace; color:{color}; font-size:0.82rem; font-weight:600;'>{v}</span>
-                    </div>
-                    <div style='background:rgba(255,255,255,0.04); border-radius:100px; height:6px; border:1px solid rgba(255,255,255,0.05);'>
-                        <div style='width:{pct*100:.1f}%; height:100%; border-radius:100px;
-                                    background:linear-gradient(90deg, {color}99, {color});
-                                    box-shadow: 0 0 8px {color}60;'></div>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-
-    with t3:
-        st.markdown("<div style='color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:1rem;'>◈ AI CLINICAL REPORT</div>", unsafe_allow_html=True)
-        st.markdown(f"""
-        <div style='background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06);
-                    border-radius:16px; padding:1.8rem 2rem;
-                    font-family:JetBrains Mono,monospace; font-size:0.82rem;
-                    line-height:2; color:#cbd5e1; white-space:pre-wrap;'>{report}</div>
-        """, unsafe_allow_html=True)
-        st.download_button("⬇  Download Report (.txt)", report,
-                           "diabetes_report.txt", "text/plain")
-
-else:
-    # Welcome
-    st.markdown("""
-    <div style='background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06);
-                border-radius:20px; padding:3.5rem 2rem; text-align:center; margin-bottom:2rem;'>
-        <div style='font-size:3rem; margin-bottom:1.2rem;'>🩺</div>
-        <div style='font-size:1.4rem; font-weight:600; color:#e2eaf5; margin-bottom:0.6rem;'>
-            Neural System Ready
-        </div>
-        <div style='color:#475569; font-size:0.9rem; max-width:400px; margin:0 auto; line-height:1.8;'>
-            Configure patient biomarkers in the sidebar panel,<br>
-            then click <span style='color:#06b6d4; font-weight:600;'>Run Neural Analysis</span>
-            to generate a full risk assessment.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    c1, c2, c3 = st.columns(3, gap="medium")
-    cards = [
-        ("⬡", "#3b82f6", "RBF Network", "Manually implemented Radial Basis Function network with K-Means derived Gaussian centers. Zero dependency on neural network frameworks."),
-        ("◈", "#06b6d4", "Explainable AI", "Rule-based clinical engine maps each biomarker to established medical reference ranges and generates actionable findings."),
-        ("✦", "#8b5cf6", "F1-Optimized", "Decision threshold tuned across 0.1–0.9 range via F1-Score maximization for optimal precision-recall balance."),
-    ]
-    for col, (icon, color, title, desc) in zip([c1, c2, c3], cards):
-        with col:
-            st.markdown(f"""
-            <div style='background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06);
-                        border-radius:16px; padding:1.6rem; height:100%;
-                        transition:all 0.3s;'>
-                <div style='width:40px; height:40px; border-radius:10px;
-                            background:{color}18; border:1px solid {color}40;
-                            display:flex; align-items:center; justify-content:center;
-                            font-size:1.2rem; color:{color}; margin-bottom:1rem;'>{icon}</div>
-                <div style='font-weight:600; font-size:1rem; color:#e2eaf5;
-                            margin-bottom:0.5rem;'>{title}</div>
-                <div style='color:#475569; font-size:0.82rem; line-height:1.7;'>{desc}</div>
-            </div>
-            """, unsafe_allow_html=True)
-
-# Footer
-st.markdown("""
-<hr style='border-color:rgba(255,255,255,0.05); margin:2rem 0 1rem;'>
-<div style='text-align:center; color:#334155; font-size:0.75rem; padding-bottom:0.5rem; font-family:JetBrains Mono,monospace; letter-spacing:0.5px;'>
-    DiabetesAI &nbsp;·&nbsp; RBF Neural Network &nbsp;·&nbsp; Pima Indians Dataset &nbsp;·&nbsp; Built for Portfolio
-</div>
-""", unsafe_allow_html=True)
+    report = generate_report(preg, gluc, bp, skin, ins, bmi, 
