@@ -210,7 +210,7 @@ def generate_report(preg, gluc, bp, skin, ins, bmi, dpf, age, pred, p_diab):
 
 
 # ══ Dark Plots ═══════════════════════════════════════════
-BG, SRF, BDR = "#030712", "#0d1b2e", "rgba(255,255,255,0.06)"
+BG, SRF, BDR = "#030712", "#0d1b2e", "#1e293b"
 BLUE, CYAN, RED, TEAL, MUT = "#3b82f6", "#06b6d4", "#f43f5e", "#14b8a6", "#475569"
 
 def fig_base(w, h):
@@ -231,7 +231,7 @@ def plot_gauge(prob):
 
     theta = np.linspace(np.pi, 0, 500)
     # BG track
-    ax.plot(theta, [1]*500, color=BDR, linewidth=14, solid_capstyle='round')
+    ax.plot(theta, [1]*500, color='#1e293b', linewidth=14, solid_capstyle='round')
     # zones
     z1 = int(0.4*500); z2 = int(0.65*500)
     ax.plot(theta[:z1],    [1]*z1,    color="#14532d", linewidth=14, alpha=0.6, solid_capstyle='round')
