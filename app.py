@@ -10,7 +10,7 @@ st.set_page_config(
     page_title="DiabetesAI · Neural Risk System",
     page_icon="🩺",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
 st.markdown("""
@@ -45,38 +45,6 @@ st.markdown("""
                 var(--bg) !important;
 }
 .main .block-container { padding: 2rem 2.5rem; max-width: 1440px; }
-
-/* ── Mobile Responsive ── */
-@media (max-width: 768px) {
-    .main .block-container { padding: 1rem 0.8rem !important; }
-
-    /* Sidebar full width on mobile */
-    section[data-testid="stSidebar"] {
-        width: 100% !important;
-        min-width: 100% !important;
-    }
-
-    /* Stack columns vertically */
-    [data-testid="column"] {
-        width: 100% !important;
-        flex: 1 1 100% !important;
-        min-width: 100% !important;
-    }
-
-    /* Smaller hero title */
-    .hero-title { font-size: 1.6rem !important; }
-
-    /* Metrics smaller */
-    div[data-testid="stMetric"] { padding: 0.7rem !important; }
-    div[data-testid="stMetric"] [data-testid="stMetricValue"] { font-size: 1rem !important; }
-
-    /* Tabs scrollable */
-    .stTabs [data-baseweb="tab-list"] { overflow-x: auto !important; flex-wrap: nowrap !important; }
-    .stTabs [data-baseweb="tab"] { font-size: 0.75rem !important; padding: 0.4rem 0.7rem !important; white-space: nowrap !important; }
-
-    /* Risk banner stack */
-    .risk-banner-inner { flex-direction: column !important; gap: 0.8rem !important; text-align: center !important; }
-}
 
 /* ── Sidebar ── */
 section[data-testid="stSidebar"] {
@@ -442,23 +410,6 @@ with c3: st.metric("Training Records", "768")
 with c4: st.metric("Decision Threshold", f"{threshold:.2f}")
 
 st.markdown("<hr style='border-color:rgba(255,255,255,0.05); margin:1.5rem 0;'>", unsafe_allow_html=True)
-
-# ── MOBILE INPUT SECTION ──────────────────────────────
-with st.expander("📋  Patient Parameters", expanded=False):
-    mc1, mc2 = st.columns(2)
-    with mc1:
-        preg  = st.slider("Pregnancies",              0,   17,  preg,  1, key="m_preg")
-        gluc  = st.slider("Glucose (mg/dL)",         44,  200, gluc,   1, key="m_gluc")
-        bp    = st.slider("Blood Pressure (mmHg)",   24,  122,  bp,    1, key="m_bp")
-        skin  = st.slider("Skin Thickness (mm)",      7,   99, skin,   1, key="m_skin")
-    with mc2:
-        ins   = st.slider("Insulin (μU/mL)",         14,  846,  ins,   1, key="m_ins")
-        bmi   = st.slider("BMI",                   18.0, 67.0,  bmi, 0.1, key="m_bmi")
-        dpf   = st.slider("Diabetes Pedigree",     0.08, 2.42,  dpf,0.01, key="m_dpf")
-        age   = st.slider("Age (years)",             21,   81,  age,   1, key="m_age")
-    run = st.button("⬡  Run Neural Analysis", key="mobile_run") or run
-
-st.markdown("<hr style='border-color:rgba(255,255,255,0.05); margin:1rem 0;'>", unsafe_allow_html=True)
 
 # ── RESULT ────────────────────────────────────────────
 if run:
